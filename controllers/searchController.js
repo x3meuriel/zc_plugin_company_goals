@@ -3,20 +3,45 @@ const {getFiles} = require('../utils/Directory');
 
 
 module.exports.searchFile = async (req, res) =>{
-   const {channelName, fileName} = req.query;
+   const {fileName} = req.query; 
+   // uncomment for a post request
+   // const  body = req.body;
+   // console.log(body.channels);
+   // const channelNames = body.channels.split(',');
 
-   
- try{
-     const folderPath = `./uploads/${channelName}`
-     const data = await getFiles(folderPath, fileName);
+   channelNames = ['goals', 'music'];
 
-        if(data.length){
-            return  res.status(200).json({message: 'Found', data: data})
+   const result = Promise.all( channelNames.map(async channel=>{
+        const folderPath = `./uploads/${channel}`
+        try{
+
+            const data = await getFiles(folderPath, fileName);
+            
+            const channelResult = {channel: channel, data: data}
+
+            return channelResult;
         }
-        
-        return res.status(404).json({message: 'Not Found', data: null})  
-    }
-    catch(error){
-        return res.status(500).json({message: 'Server Error', data: null})  
-    }
+
+
+         catch(error){
+            return res.status(500).json({message: 'Server Error', data: null})  
+        }
+
+     })) 
+    
+
+
+    const output = await result;
+   
+  
+    return res.status(200).json({message: 'success' , data: output})
+
+
+
+    
+
+
+     
+    
+   
 }
